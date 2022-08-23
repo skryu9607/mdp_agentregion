@@ -10,7 +10,7 @@ class info:
         self.MAX_ERROR = MAX_ERROR
         self.N_region = N_region
         self.N_agent = N_agent
-        self.region = np.random.random((N_region+1,2))*10
+        self.region = np.random.random((N_region+1,2))*10 # <-?
         self.region[-1] = [0,0]
         self.mat = np.zeros((N_region+1,N_region+1)) # Cost matrix
         for i in range(N_region+1):
@@ -39,7 +39,7 @@ def has_duplicates(seq): # sequence가 없어진 것.
 def getU(agent, unc, action, Val_mat, Info):
     u = -0.01
     agent_ = np.zeros(Info.N_agent)
-    unc_ = np.zeros(Info.N_region)
+    unc_ = np.zeros(Info.N_region) # uncertainty 
     action_ = np.zeros(Info.N_agent)
     for i in range(Info.N_agent):
         if not i == 0:
@@ -65,7 +65,7 @@ def getU(agent, unc, action, Val_mat, Info):
         u -= Info.mat[int(agent_[i])][int(action_[i])]/150 # Normalization
 
     # 특수한 상황에서의 Value
-    cnt = 0
+    cnt = 0 # Count ? 
     for i in range(Info.N_region):
         if i in action_: 
             if unc_[i] == 1:
@@ -74,13 +74,11 @@ def getU(agent, unc, action, Val_mat, Info):
             if unc_[i] == 0:
                 cnt += 1
 
-    if cnt == Info.N_region:
+    if cnt == Info.N_region: # 도든 지역을 다 돌았다면,
         u += Info.DISCOUNT * 1
-    else:
-        u += Info.DISCOUNT * Val_mat[agent][unc]
-
-
-
+    else: # 모든 지역을 다 돌기 전에는 
+        u += Info.DISCOUNT * Val_mat[agent][unc]  # Val_mat : valueItreation(Val_mat,Info)
+    
     return u
 
 def cal_val(agent, unc, action, Val_mat, Info):
@@ -103,7 +101,7 @@ def valueIteration(Val_mat,Info):
         error = 0
         for agent in range((N_region+1)**N_agent):
             for unc in range(2**N_region):
-                # print(cal_val(agent, unc, 0, Val_mat, Info))
+                print(cal_val(agent, unc, 0, Val_mat, Info))
                 Next_val_mat[agent][unc] = max([cal_val(agent, unc, action, Val_mat, Info) for action in range(N_action)]) # Bellman update
                 error = max(error, abs(Next_val_mat[agent][unc]-Val_mat[agent][unc]))
             toc = time.time()
@@ -118,7 +116,7 @@ def valueIteration(Val_mat,Info):
             break
     return Val_mat
 
-def getOptimalPolicy(Val_mat, Info):
+def getOptimalPolicy(Val_mat, Info): # ACTION들을 다 따져서 최고의 BEST POLICY만 가져가는 것.
     N_agent = Info.N_agent
     N_region = Info.N_region
     N_action = (N_region+1) ** N_agent
@@ -147,7 +145,7 @@ def simulate(policy, Info, init_agent, init_unc):
         tt.append([])
         aa[i], = ax.plot(0,0,'ro')
         tt[i] = plt.text(0,0,str(i))
-
+    # 여기 부분이 새로운 formulation. 진법으로 표현하는 것.
     init_agent_ = 0
     for i in range(Info.N_agent):
         init_agent_ += init_agent[i] * (Info.N_region ** (Info.N_agent - i - 1))

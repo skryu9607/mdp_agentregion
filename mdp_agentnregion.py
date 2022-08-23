@@ -24,3 +24,4 @@ print(toc - tic,'seconds')
 
 simulate(policy, Info, np.zeros(N_agent), np.ones(N_region))
 
+prac()
