@@ -12,20 +12,20 @@ class info:
         self.N_agent = N_agent
         self.region = np.random.random((N_region+1,2))*10
         self.region[-1] = [0,0]
-        self.mat = np.zeros((N_region+1,N_region+1))
+        self.mat = np.zeros((N_region+1,N_region+1)) # Cost matrix
         for i in range(N_region+1):
             for j in range(N_region+1):
-                self.mat[i][j] = LA.norm(self.region[i] - self.region[j])
+                self.mat[i][j] = LA.norm(self.region[i] - self.region[j]) # Numpy linear algebra and norm
         # print(self.mat)
 
-def prac():
-    agent = 32124
-    N= 5
+def prac(): # Agent를 표현하는 state value. 
+    agent = 32142
+    N = 5
     aa = np.zeros(N)
     for i in range(N):
         if not i == 0:
-            agent = agent % (10**(N - i))
-        aa[i] = int(agent / (10**(N - i-1)))
+            agent = agent % (10**(N - i)) # 나머지를 주는 것. 하나씩 자리수가 없어진다. 
+        aa[i] = int(agent / (10**(N - i-1))) # 가장 처음 것이 없어진다. 
     print(aa)
 
     bb = 0
@@ -33,7 +33,7 @@ def prac():
         bb += aa[i]*(10**(N-i-1))
     print(bb)
     return 0
-def has_duplicates(seq):
+def has_duplicates(seq): # sequence가 없어진 것.
     return len(seq) != len(set(seq))
 
 def getU(agent, unc, action, Val_mat, Info):
@@ -53,21 +53,21 @@ def getU(agent, unc, action, Val_mat, Info):
         if not i == 0:
             action = action % ((Info.N_region+1) ** (Info.N_agent - i))
         action_[i] = int(action / ((Info.N_region+1) ** (Info.N_agent - i - 1)))
-
+        # agent와 unc와 action 를 expression one single value -> single list
     flag = True
     # reward - penalty 계산
     for i in range(Info.N_agent):
-        if action_[i] < Info.N_region:
+        if action_[i] < Info.N_region: # 이게 아닌 경우는 무엇일까?, 예외처리.
             unc__ = unc_
             if unc__[int(action_[i])] == 1:
                 u += 0.1
                 unc__[int(action_[i])] = 0 # 같은 곳을 방문하면 점수 없음
-        u -= Info.mat[int(agent_[i])][int(action_[i])]/150
+        u -= Info.mat[int(agent_[i])][int(action_[i])]/150 # Normalization
 
     # 특수한 상황에서의 Value
     cnt = 0
     for i in range(Info.N_region):
-        if i in action_:
+        if i in action_: 
             if unc_[i] == 1:
                 cnt += 1
         else:
