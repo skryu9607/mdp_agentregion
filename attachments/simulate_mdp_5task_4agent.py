@@ -5,7 +5,7 @@ np.random.seed(1)
 
 # Set up the initial environment
 N_region = 5
-N_agent = 3
+N_agent = 4
 
 region = np.random.random((N_region+1,2))*10
 region[-1] = [0,0]
@@ -45,28 +45,39 @@ for line in rdr:
         policy_t5a3[cnt].append(float(line[i]))
     cnt += 1
 f.close()
+file_name = 't5a4.csv'
+f = open(file_name, 'r')
+rdr = csv.reader(f)
+policy_t5a4 = []
+cnt = 0
+for line in rdr:
+    policy_t5a4.append([])
+    for i in range(len(line)):
+        policy_t5a4[cnt].append(float(line[i]))
+    cnt += 1
+f.close()
 #
 init_agent = np.zeros(N_agent)
 init_unc = np.ones(N_region)
 
 region_ = np.transpose(region)
 fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.plot(region_[0],region_[1],"o")
-
+_,axes = plt.subplots(1,2)
+ax = axes[0]
+ax2 = axes[1]
+ax.plot(region_[0],region_[1],"ko")
 aa = []
 tt = []
 for i in range(N_agent):
     aa.append([])
     tt.append([])
-    aa[i], = ax.plot(0,0,'ro')
-    tt[i] = plt.text(0,0,str(i))
-
+    aa[i], = ax.plot(0,0,'bo')
+    tt[i] = ax.text(0,0,str(i))
 init_agent_ = 0
 for i in range(N_agent):
     init_agent_ += init_agent[i] * (N_region ** (N_agent - i - 1))
 
-Fuel_max = 6
+Fuel_max = 5
 fuel_state = []
 agent_state = []
 for i in range(N_agent):
@@ -97,12 +108,18 @@ while cnt < 20:
         agent_ = 0
         for i in range(len(agent_moving)):
             agent_ += agent_state[agent_moving[i]] * ((N_region + 1) ** (len(agent_moving) - i - 1))
-        if len(agent_moving) == 3:
+        if len(agent_moving) == 4:
+            ax.plot(0,0,'ko')
+            action = policy_t5a4[int(agent_)][int(init_unc_)]
+        elif len(agent_moving) == 3:
+            ax.plot(0,0,'ro')
             action = policy_t5a3[int(agent_)][int(init_unc_)]
         elif len(agent_moving) == 2:
             action = policy_t5a2[int(agent_)][int(init_unc_)]
+            refueling, = ax.plot(0,0,'ro')
         elif len(agent_moving) == 1:
             action = policy_t5a1[int(agent_)][int(init_unc_)]
+            refueling, = ax.plot(0,0,'ro')
         else:
             action = -1
         if action == -1:
@@ -115,15 +132,6 @@ while cnt < 20:
 
         for i in range(len(agent_moving)):
             action_out[agent_moving[i]] = action_[i]
-
-    # init_unc = np.ones(N_region)
-    # for i in range(N_agent):
-    #     if action_out[i] < N_region:
-    #         init_unc[int(action_out[i])] = 0
-    #
-    # init_unc_ = 0
-    # for i in range(N_region):
-    #     init_unc_ += init_unc[i] * (2 ** (N_region - i - 1))
 
     for i in range(N_agent):
         if action_out[i] < N_region:
@@ -155,6 +163,7 @@ while cnt < 20:
         aa[i].set_xdata(region[int(action_out[i])][0])
         aa[i].set_ydata(region[int(action_out[i])][1])
         tt[i].set_position((region[int(action_out[i])][0], region[int(action_out[i])][1]))
-
+    
+    ax2.bar(range(N_region),init_unc,color='r')
     print(cnt, action_out)
     plt.pause(0.5)

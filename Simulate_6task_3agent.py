@@ -45,23 +45,24 @@ for line in rdr:
         policy_t6a3[cnt].append(float(line[i]))
     cnt += 1
 f.close()
+
 #
 init_agent = np.zeros(N_agent)
 init_unc = np.ones(N_region)
 
 region_ = np.transpose(region)
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.plot(region_[0],region_[1],"o")
-
+_,axes = plt.subplots(1,3)
+ax = axes[0]
+ax2 = axes[1]
+ax3 = axes[2]
+ax.plot(region_[0],region_[1],"ko")
 aa = []
 tt = []
 for i in range(N_agent):
     aa.append([])
     tt.append([])
-    aa[i], = ax.plot(0,0,'ro')
-    tt[i] = plt.text(0,0,str(i))
-
+    aa[i], = ax.plot(0,0,'bo')
+    tt[i] = ax.text(0,0,str(i))
 init_agent_ = 0
 for i in range(N_agent):
     init_agent_ += init_agent[i] * (N_region ** (N_agent - i - 1))
@@ -79,7 +80,7 @@ for i in range(N_region):
 cnt = 0
 
 agent_moving = []
-
+unc =  [1] * N_region
 while cnt < 20:
     cnt += 1
     for i in range(N_agent):
@@ -98,11 +99,14 @@ while cnt < 20:
         for i in range(len(agent_moving)):
             agent_ += agent_state[agent_moving[i]] * ((N_region + 1) ** (len(agent_moving) - i - 1))
         if len(agent_moving) == 3:
+            ax.plot(0,0,'ko')
             action = policy_t6a3[int(agent_)][int(init_unc_)]
         elif len(agent_moving) == 2:
             action = policy_t6a2[int(agent_)][int(init_unc_)]
+            refueling, = ax.plot(0,0,'ro')
         elif len(agent_moving) == 1:
             action = policy_t6a1[int(agent_)][int(init_unc_)]
+            refueling, = ax.plot(0,0,'ro')
         else:
             action = -1
         if action == -1:
@@ -141,11 +145,23 @@ while cnt < 20:
 
     agent_state[0] = action_out[0]
     agent_state[1] = action_out[1]
-    print(fuel_state,action_out,init_unc)
+    # there is no uncertainties in all regions, uncertainties get back to all zeros. -> We want continuously discover the area.
+    if unc == [0] * N_region:
+        unc = [1] * N_region
+    for i in range(len(unc)):
+        if unc[i] == 1 and init_unc[i] == 1:
+            unc[i] = 1
+        else:
+            unc[i] = 0
+    ax2.bar(range(N_region),init_unc,color='b')        
+    ax3.bar(range(N_region),unc,color='r')
+    print(fuel_state,action_out,init_unc,unc)
     for i in range(N_agent):
         aa[i].set_xdata(region[int(action_out[i])][0])
         aa[i].set_ydata(region[int(action_out[i])][1])
         tt[i].set_position((region[int(action_out[i])][0], region[int(action_out[i])][1]))
 
     print(cnt, action_out)
-    plt.pause(0.5)
+    plt.pause(0.8)
+    ax2.clear()
+    ax3.clear()

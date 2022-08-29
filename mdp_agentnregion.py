@@ -12,8 +12,8 @@ DISCOUNT = 0.8
 MAX_ERROR = 10**(-2)
 
 # Set up the initial environment
-N_region = 6
-N_agent = 3
+N_region = 5
+N_agent = 4
 
 region = np.random.random((N_region+1,2))*10
 region[-1] = [0,0]
@@ -33,7 +33,7 @@ policy = getOptimalPolicy(Val_mat, Info)
 toc = time.time()
 print(toc - tic,'seconds')
 
-file_name = 't6a3.csv'
+file_name = 't5a4.csv'
 with open(file_name, 'w', newline='') as f:
     # using csv.writer method from CSV package
     write = csv.writer(f)
